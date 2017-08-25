@@ -1,0 +1,1971 @@
+// This file has a model of the IEEE 13 meter test feeder with houses attached
+
+#set profiler=1
+#set threadcount=1;
+#set randomseed=1;
+#set relax_naming_rules=1;
+#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0
+
+
+
+#define rotor_convergence=0.01
+
+//Deltamode declarations - global values
+#set deltamode_maximumtime=5000000000000
+#set deltamode_iteration_limit=10		//Iteration limit
+
+
+clock {
+	timezone "PST+8PDT";
+	starttime '2010-01-01 12:00:00 PST';
+	stoptime '2010-01-01 12:10:00 PST';
+}
+
+
+module tape;
+
+module powerflow {
+	enable_subsecond_models true;
+	deltamode_timestep 100 ms;
+	all_powerflow_delta true;
+	solver_method NR;
+	maximum_voltage_error 0.2;
+	nominal_frequency 50; // in Hz
+	line_limits FALSE;
+};
+
+module generators {
+	enable_subsecond_models true;	//Enables deltamode for generator module
+	deltamode_timestep 100.0 ms;	//Desired timestep for the generator module models
+};
+
+module residential {
+	implicit_enduses NONE;
+	ANSI_voltage_check FALSE;
+};
+
+
+schedule waterdemand1 {
+	* 0-5 * * * 0;
+	0-16 6 * * * 0;
+	17-34 6 * * * 0.2;
+	35-59 6 * * * 0.4;
+	0-11 7 * * * 0.3;
+	12-59 7 * * * 0;
+	* 8-16 * * * .05;
+	* 17 * * * 0;
+	0-15 18 * * * 0;
+	16-59 18 * * * 0.8;
+	* 19-21 * * * 0;
+	00-45 22 * * * 0;
+	46-59 22 * * * 0.6;
+	* 23 * * * 0;
+}
+
+schedule waterdemand2 {
+	* 0-4 * * * 0;
+	0-10 5 * * * .4;
+	11-37 5 * * * 0.1;
+	38-59 5 * * * 0.6;
+	0-16 6 * * * 0.4;
+	17-59 6 * * * 0;
+	* 7-16 * * * 0.01;
+	0-12 17 * * * 0.5;
+	13-59 17 * * * 0;
+	* 18-23 * * * 0;
+}
+
+schedule waterdemand3 {
+	* 0-6 * * * 0;
+	0-16 7 * * * 0;
+	17-34 7 * * * 0.4;
+	35-59 7 * * * 0.8;
+	0-11 8 * * * 0.1;
+	12-59 8 * * * 0;
+	* 9-15 * * * 0.005;
+	* 16 * * * 0.1;
+	* 17 * * * 0.2;
+	0-27 18 * * * 0.7;
+	28-59 18 * * * 0;
+	* 19-23 * * * 0;
+}
+
+schedule heatingsetpoint1 {
+	* 0-4 * * * 60;
+	* 5 * * * 70;
+	00-30 6 * * * 70;
+	31-59 6 * * * 60;
+	* 7-16 * * * 60;
+	* 17-21 * * * 70;
+	* 22-23 * * * 60;
+}
+schedule heatingsetpoint2 {
+	* 0-5 * * * 60;
+	* 6 * * * 70;
+	00-15 7 * * * 70;
+	16-59 7 * * * 60;
+	* 8-17 * * * 60;
+	* 18-22 * * * 70;
+	* 23 * * * 60;
+}
+schedule heatingsetpoint3 {
+	* 0-6 * * * 60;
+	* 7 * * * 70;
+	00-23 8 * * * 70;
+	24-59 8 * * * 60;
+	* 9-18 * * * 60;
+	* 19-20 * * * 70;
+	* 21-23 * * * 60;
+}
+schedule heatingsetpoint4 {
+	* 0-4 * * * 60;
+	00-30 5 * * * 60;
+	31-59 5 * * * 70;
+	* 6-7 * * * 70;
+	00-30 8 * * * 70;
+	31-59 8 * * * 60;
+	* 9-17 * * * 60;
+	00-30 18 * * * 60;
+	31-59 18 * * * 70;
+	* 19-20 * * * 70;
+	00-45 21 * * * 70;
+	46-59 21 * * * 60;
+	* 22-23 * * * 60;
+}
+schedule heatingsetpoint5 {
+	* 0-6 * * * 60;
+	00-30 7 * * * 60;
+	31-59 7 * * * 70;
+	* 8 * * * 70;
+	00-30 9 * * * 70;
+	31-59 9 * * * 60;
+	* 10-16 * * * 60;
+	00-15 17 * * * 60;
+	16-59 17 * * * 70;
+	* 18-22 * * * 70;
+	00-42 23 * * * 70;
+	43-59 23 * * * 60;
+}
+
+
+schedule ZIP1base_power {
+	00-29  00   *   *  *   1.686360
+	30-59  00   *   *  *   1.616535
+	00-29  01   *   *  *   1.593260
+	30-59  01   *   *  *   1.553267
+	00-29  02   *   *  *   1.539935
+	30-59  02   *   *  *   1.523217
+	00-29  03   *   *  *   1.517644
+	30-59  03   *   *  *   1.526276
+	00-29  04   *   *  *   1.529154
+	30-59  04   *   *  *   1.579583
+	00-29  05   *   *  *   1.596393
+	30-59  05   *   *  *   1.731125
+	00-29  06   *   *  *   1.776036
+	30-59  06   *   *  *   1.971087
+	00-29  07   *   *  *   2.036104
+	30-59  07   *   *  *   2.123794
+	00-29  08   *   *  *   2.153025
+	30-59  08   *   *  *   2.120079
+	00-29  09   *   *  *   2.109097
+	30-59  09   *   *  *   2.081561
+	00-29  10   *   *  *   2.072382
+	30-59  10   *   *  *   2.056046
+	00-29  11   *   *  *   2.050600
+	30-59  11   *   *  *   2.028199
+	00-29  12   *   *  *   2.020733
+	30-59  12   *   *  *   2.011171
+	00-29  13   *   *  *   2.007984
+	30-59  13   *   *  *   2.000226
+	00-29  14   *   *  *   1.997640
+	30-59  14   *   *  *   1.997694
+	00-29  15   *   *  *   1.997713
+	30-59  15   *   *  *   2.029784
+	00-29  16   *   *  *   2.040474
+	30-59  16   *   *  *   2.157669
+	00-29  17   *   *  *   2.196733
+	30-59  17   *   *  *   2.262461
+	00-29  18   *   *  *   2.284370
+	30-59  18   *   *  *   2.273333
+	00-29  19   *   *  *   2.269654
+	30-59  19   *   *  *   2.239386
+	00-29  20   *   *  *   2.229297
+	30-59  20   *   *  *   2.178758
+	00-29  21   *   *  *   2.161912
+	30-59  21   *   *  *   2.064059
+	00-29  22   *   *  *   2.031441
+	30-59  22   *   *  *   1.897692
+	00-29  23   *   *  *   1.853109
+	30-59  23   *   *  *   1.728047
+}
+
+object triplex_line_conductor {
+	name tp_line_conductor;
+	resistance 0.97;
+	geometric_mean_radius 0.0111;
+};
+
+// Triplex Line
+object triplex_line_configuration {
+	name triplex_line_configuration_1;
+	conductor_1 tp_line_conductor;
+	conductor_2 tp_line_conductor;
+	conductor_N tp_line_conductor;
+	insulation_thickness 0.08;
+	diameter 0.368;
+}
+
+// Phase Conductor for 601: 556,500 26/7 ACSR
+object overhead_line_conductor:6010 {
+	geometric_mean_radius 0.031300;
+	resistance 0.185900;
+}
+
+// Phase Conductor for 602: 4/0 6/1 ACSR
+object overhead_line_conductor:6020 {
+	geometric_mean_radius 0.00814;
+	resistance 0.592000;
+}
+
+// Phase Conductor for 603, 604, 605: 1/0 ACSR
+object overhead_line_conductor:6030 {
+	geometric_mean_radius 0.004460;
+	resistance 1.120000;
+}
+
+// Phase Conductor for 606: 250,000 AA,CN
+object underground_line_conductor:6060 { 
+	outer_diameter 1.290000;
+	conductor_gmr 0.017100;
+	conductor_diameter 0.567000;
+	conductor_resistance 0.410000;
+	neutral_gmr 0.0020800; 
+	neutral_resistance 14.87200;  
+	neutral_diameter 0.0640837;
+	neutral_strands 13.000000;
+	shield_gmr 0.000000;
+	shield_resistance 0.000000;
+}
+
+// Phase Conductor for 607: 1/0 AA,TS N: 1/0 Cu
+object underground_line_conductor:6070 { 
+	outer_diameter 1.060000;
+	conductor_gmr 0.011100;
+	conductor_diameter 0.368000;
+	conductor_resistance 0.970000;
+	neutral_gmr 0.011100;
+	neutral_resistance 0.970000; 
+	neutral_diameter 0.0640837;
+	neutral_strands 6.000000;
+	shield_gmr 0.000000;
+	shield_resistance 0.000000;
+}
+
+// Overhead line configurations
+object line_spacing:500601 {
+	distance_AB 2.5;
+	distance_AC 4.5;
+	distance_BC 7.0;
+	distance_BN 5.656854;
+	distance_AN 4.272002;
+	distance_CN 5.0;
+}
+
+// Overhead line configurations
+object line_spacing:500602 {
+	distance_AC 2.5;
+	distance_AB 4.5;
+	distance_BC 7.0;
+	distance_CN 5.656854;
+	distance_AN 4.272002;
+	distance_BN 5.0;
+}
+
+object line_spacing:505603 {
+	distance_AC 0.0;
+	distance_AB 0.0;
+	distance_BC 7.0;
+	distance_AN 0.0;
+	distance_CN 5.656854;
+	distance_BN 5.0;
+}
+
+object line_spacing:505604 {
+	distance_AC 7.0;
+	distance_AB 0.0;
+	distance_BC 0.0;
+	distance_AN 5.656854;
+	distance_CN 5.0;
+	distance_BN 0.0;
+}
+
+object line_spacing:510 {
+	distance_AC 0.0;
+	distance_AB 0.0;
+	distance_BC 0.0;
+	distance_AN 0.0;
+	distance_CN 5.0;
+	distance_BN 0.0;
+}
+
+object line_configuration:601 {
+	conductor_A overhead_line_conductor:6010;
+	conductor_B overhead_line_conductor:6010;
+	conductor_C overhead_line_conductor:6010;
+	conductor_N overhead_line_conductor:6020;
+	spacing line_spacing:500601;
+}
+
+object line_configuration:602 {
+	conductor_A overhead_line_conductor:6020;
+	conductor_B overhead_line_conductor:6020;
+	conductor_C overhead_line_conductor:6020;
+	conductor_N overhead_line_conductor:6020;
+	spacing line_spacing:500602;
+}
+
+object line_configuration:603 {
+	conductor_B overhead_line_conductor:6030;
+	conductor_C overhead_line_conductor:6030;
+	conductor_N overhead_line_conductor:6030;
+	spacing line_spacing:505603;
+}
+
+object line_configuration:604 {
+	conductor_A overhead_line_conductor:6030;
+	conductor_C overhead_line_conductor:6030;
+	conductor_N overhead_line_conductor:6030;
+	spacing line_spacing:505604;
+}
+
+object line_configuration:605 {
+	conductor_C overhead_line_conductor:6030;
+	conductor_N overhead_line_conductor:6030;
+	spacing line_spacing:510;
+}
+
+// Underground line configuration
+object line_spacing:515 {
+	distance_AB 0.500000;
+	distance_BC 0.500000;
+	distance_AC 1.000000;
+	distance_AN 0.000000;
+	distance_BN 0.000000;
+	distance_CN 0.000000;
+}
+
+object line_spacing:520 {
+	distance_AB 0.000000;
+	distance_BC 0.000000;
+	distance_AC 0.000000;
+	distance_AN 0.083333;
+	distance_BN 0.000000;
+	distance_CN 0.000000;
+}
+
+object line_configuration:606 {
+	conductor_A underground_line_conductor:6060;
+	conductor_B underground_line_conductor:6060;
+	conductor_C underground_line_conductor:6060;
+	spacing line_spacing:515;
+}
+
+object line_configuration:607 {
+	conductor_A underground_line_conductor:6070;
+	conductor_N underground_line_conductor:6070;
+	spacing line_spacing:520;
+}
+
+// Define line objects
+object overhead_line:632645 {
+	phases "BCN";
+	name 632-645;
+	from meter:632;
+	to meter:645;
+	length 500;
+	configuration line_configuration:603;
+}
+
+object overhead_line:645646 {
+	phases "BCN";
+	name 645-646;
+	from meter:645;
+	to meter:646;
+	length 300;
+	configuration line_configuration:603;
+}
+
+object overhead_line:630632 {
+	phases "ABCN";
+	name 630-632;
+	from meter:630;
+	to meter:632;
+	length 2000;
+	configuration line_configuration:601;
+}
+
+// Split line for distributed load
+object overhead_line:6326321 {
+	phases "ABCN";
+	name 632-6321;
+	from meter:632;
+	to meter:6321;
+	length 500;
+	configuration line_configuration:601;
+}
+
+object overhead_line:6321671 {
+	phases "ABCN";
+	name 6321-671;
+	from meter:6321;
+	to meter:671;
+	length 1500;
+	configuration line_configuration:601;
+}
+
+// End split line
+object overhead_line:671680 {
+	phases "ABCN";
+	name 671-680;
+	from meter:671;
+	to meter:680;
+	length 1000;
+	configuration line_configuration:601;
+}
+
+object overhead_line:671684 {
+	phases "ACN";
+	name 671-684;
+	from meter:671;
+	to meter:684;
+	length 300;
+	configuration line_configuration:604;
+}
+
+object overhead_line:684611 {
+	phases "CN";
+	name 684-611;
+	from meter:684;
+	to meter:611;
+	length 300;
+	configuration line_configuration:605;
+}
+
+object underground_line:684652 {
+	phases "AN";
+	name 684-652;
+	from meter:684;
+	to meter:652;
+	length 800;
+	configuration line_configuration:607;
+}
+
+object underground_line:692675 {
+	phases "ABC";
+	name 692-675;
+	from meter:692;
+	to meter:675;
+	length 500;
+	configuration line_configuration:606;
+}
+
+object overhead_line:632633 {
+	phases "ABCN";
+	name 632-633;
+	from meter:632;
+	to meter:633;
+	length 500;
+	configuration line_configuration:602;
+}
+
+// Create meter objects
+object meter:633 {
+	name 633;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter633.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:630 {
+	name 630;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771+0j;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter630.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+ 
+object meter:632 {
+	name 632;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter632.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:650 {
+	name 650;
+	phases "ABCN";
+	bustype SWING;
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter650.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+} 
+ object diesel_dg {
+	parent 650;
+	name Gen_Bus;
+	Rated_V 4160;
+	Rated_VA 10.0 MVA;  //default value 
+	flags DELTAMODE;
+	Gen_type DYN_SYNCHRONOUS;
+        Exciter_type SEXS;                  //Give it voltage control
+        Governor_type DEGOV1;               //Make it try to maintain frequency
+        rotor_speed_convergence ${rotor_convergence};  
+        object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file production_swing_outputs/Diesel_swingnode.csv;
+		interval 1;	
+		limit 100000000000;
+		property power_out_A.real, power_out_A.imag, power_out_B.real, power_out_B.imag, power_out_C.real, power_out_C.imag;
+};  
+}
+ 
+object meter:671 {
+	name 671;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter671.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:680 {
+	name 680;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter680.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+ 
+ 
+object meter:684 {
+	name 684;
+	phases "ACN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter684.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+} 
+ 
+// distributed load between meter 632 and 671
+// 2/3 of load 1/4 of length down line: Kersting p.56
+object meter:6711 {
+	name 6711;
+	parent 611;
+	phases "CN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771; 
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter6711.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+ 
+object meter:6321 {
+	name 6321;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;    
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter6321.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+ 
+// Create meter objects with attached loads 
+object meter:611 {
+	name 611;
+	phases "CN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter611.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:634 {
+	name 634;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 480.000+0j;
+	voltage_B -240.000-415.6922j;
+	voltage_C -240.000+415.6922j;
+	nominal_voltage 480.000;                          
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter634.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:645 {
+	name 645;
+	phases "BCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;            
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter645.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:646 {
+	name 646;
+	phases "BCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771; 
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter646.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:652 {
+	name 652;
+	phases "AN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;      
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter652.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:675 {
+	name 675;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter675.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};
+}
+
+object meter:692 {
+	name 692;
+	phases "ABCN";
+	flags DELTAMODE;
+	frequency_measure_type PLL;
+	voltage_A 2401.7771;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	nominal_voltage 2401.7771;
+	object recorder {                            
+		flags DELTAMODE;	//Must explicitly set the recorder to do deltamode
+		file meters_outputs/meter692.csv;
+		interval 1;	
+		limit 100000000000;
+		property measured_angle_A, measured_angle_B, measured_angle_C, measured_frequency_A, measured_frequency_B, measured_frequency_C, measured_frequency, measured_power.real, measured_power.imag, measured_power_A.real, measured_power_A.imag, measured_power_B.real, measured_power_B.imag, measured_power_C.real, measured_power_C.imag;
+	};	
+}
+
+object transformer {
+	name center_tap_1; 
+	phases CS; 
+	from meter:611; 
+	to trip_meter1; 
+	configuration CS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_2; 
+	phases AS; 
+	from meter:634; 
+	to trip_meter2; 
+	configuration AS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_3; 
+	phases BS; 
+	from meter:634; 
+	to trip_meter3; 
+	configuration BS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_4; 
+	phases CS; 
+	from meter:634; 
+	to trip_meter4; 
+	configuration CS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_5; 
+	phases BS; 
+	from meter:645; 
+	to trip_meter5; 
+	configuration BS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_6; 
+	phases CS; 
+	from meter:645; 
+	to trip_meter6; 
+	configuration CS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_7; 
+	phases BS; 
+	from meter:646; 
+	to trip_meter7; 
+	configuration BS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_8; 
+	phases CS; 
+	from meter:646; 
+	to trip_meter8; 
+	configuration CS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_9; 
+	phases AS; 
+	from meter:652; 
+	to trip_meter9; 
+	configuration AS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_10; 
+	phases AS; 
+	from meter:675; 
+	to trip_meter10; 
+	configuration AS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_11; 
+	phases BS; 
+	from meter:675; 
+	to trip_meter11; 
+	configuration BS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_12; 
+	phases CS; 
+	from meter:675; 
+	to trip_meter12; 
+	configuration CS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_13; 
+	phases AS; 
+	from meter:692; 
+	to trip_meter13; 
+	configuration AS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_14; 
+	phases BS; 
+	from meter:692; 
+	to trip_meter14; 
+	configuration BS_config;
+	flags DELTAMODE;
+}
+
+object transformer {
+	name center_tap_15; 
+	phases CS; 
+	from meter:692; 
+	to trip_meter15; 
+	configuration CS_config;
+	flags DELTAMODE;
+}
+
+// House 1 meter
+object triplex_meter {
+	name trip_meter1; 
+	phases CS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 2 meter
+object triplex_meter {
+	name trip_meter2; 
+	phases AS;
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 3 meter
+object triplex_meter {
+	name trip_meter3; 
+	phases BS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 4 meter
+object triplex_meter {
+	name trip_meter4; 
+	phases CS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 5 meter
+object triplex_meter {
+	name trip_meter5; 
+	phases BS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 6 meter
+object triplex_meter {
+	name trip_meter6; 
+	phases CS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 7 meter
+object triplex_meter {
+	name trip_meter7; 
+	phases BS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 8 meter
+object triplex_meter {
+	name trip_meter8; 
+	phases CS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 9 meter
+object triplex_meter {
+	name trip_meter9; 
+	phases AS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 10 meter
+object triplex_meter {
+	name trip_meter10; 
+	phases AS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 11 meter
+object triplex_meter {
+	name trip_meter11; 
+	phases BS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 12 meter
+object triplex_meter {
+	name trip_meter12; 
+	phases CS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 13 meter
+object triplex_meter {
+	name trip_meter13; 
+	phases AS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 14 meter
+object triplex_meter {
+	name trip_meter14; 
+	phases BS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+
+// House 15 meter
+object triplex_meter {
+	name trip_meter15; 
+	phases CS; 
+	flags DELTAMODE;
+	nominal_voltage 120;
+}
+ 
+// Switch
+object switch:671692 {
+	phases "ABCN";
+	name 671-692;
+	from meter:671;
+	to meter:692;
+	//status CLOSED;
+	object player {
+		flags DELTAMODE;
+		file inputs/switch_status.csv;
+		property status;
+		};
+}
+ 
+// Transformer
+object transformer_configuration:400 {
+	connect_type WYE_WYE;
+  	install_type PADMOUNT;
+  	power_rating 500;
+  	primary_voltage 4160;
+  	secondary_voltage 480;
+  	resistance 0.011;
+  	reactance 0.02;
+	flags DELTAMODE;
+}
+  
+object transformer:633634 {
+  	phases "ABCN";
+  	name 633-634;
+  	from meter:633;
+  	to meter:634;
+  	configuration transformer_configuration:400;
+	flags DELTAMODE;
+}
+
+object transformer_configuration {
+	name AS_config;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	powerA_rating 75;
+	primary_voltage 2401;
+	secondary_voltage 120.000;
+	impedance 0.006+0.0136j;
+}
+
+object transformer_configuration {
+	name BS_config;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	powerB_rating 75;
+	primary_voltage 2401;
+	secondary_voltage 120.000;
+	impedance 0.006+0.0136j;
+}
+
+object transformer_configuration {
+	name CS_config;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	powerC_rating 75;
+	primary_voltage 2401;
+	secondary_voltage 120.000;
+	impedance 0.006+0.0136j;
+}
+
+object capacitor {
+	phases ABCN;
+	name CAP1;
+	pt_phase ABCN;
+	parent 675;
+	phases_connected ABCN;
+	control VOLT;
+	voltage_set_high 2500.0;
+	voltage_set_low 1950.0;
+	capacitor_A 0.300 MVAr;
+	capacitor_B 0.300 MVAr;
+	capacitor_C 0.300 MVAr;
+	control_level INDIVIDUAL;
+	time_delay 0.0;	
+	dwell_time 0.0;
+	switchA CLOSED;				// manual controls for load manipulation (don't use the switch player)
+	switchB CLOSED;
+	switchC CLOSED;
+	nominal_voltage 2401.7771;	
+	flags DELTAMODE;
+}
+
+object capacitor {
+	phases ABCN;
+	name CAP2;
+	pt_phase ABCN;
+	parent 675;
+	phases_connected ABCN;
+	control VOLT;
+	voltage_set_high 2600.0;
+	voltage_set_low 2050.0;
+	capacitor_A 0.250 MVAr;
+    capacitor_B 0.250 MVAr;
+	capacitor_C 0.250 MVAr;
+	control_level INDIVIDUAL;
+	time_delay 300.0;	
+	dwell_time 0.0;
+	switchA CLOSED;				// manual controls for load manipulation (don't use the switch player)
+	switchB CLOSED;
+	switchC CLOSED;
+	nominal_voltage 2401.7771;
+	flags DELTAMODE;
+}
+  
+// Regulator
+object regulator_configuration:6506321 {
+	connect_type WYE_WYE;
+	band_center 2000.000;
+	band_width 80.0;
+	time_delay 0.0;
+	dwell_time 0.0;
+	raise_taps 16;
+	lower_taps 16;
+	regulation 0.10;
+	Control REMOTE_NODE;
+	tap_pos_A 9;
+	tap_pos_B 7;
+	tap_pos_C 10;
+	flags DELTAMODE;
+}
+  
+object regulator:650630 {
+	phases "ABCN";
+	from meter:650;
+	to meter:630;
+	sense_node 671;
+	configuration regulator_configuration:6506321;
+	flags DELTAMODE;
+}
+
+// House 1
+object house:..20 {
+	parent trip_meter1;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint4+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	thermostat_deadband random.normal (2,.5);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand1*random.normal(1,.2);
+	};
+}
+
+
+// House 2
+object house:..20 {
+	parent trip_meter2;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand3*random.normal(1,.2);
+	};
+}
+
+
+// House 3
+object house:..20 {
+	parent trip_meter3;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand2*random.normal(1,.2);
+	};
+}
+
+
+// House 4
+object house:..20 {
+	parent trip_meter4;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint5+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand3*random.normal(1,.2);
+	};
+}
+
+
+// House 5
+object house:..20 {
+	parent trip_meter5;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand3*random.normal(1,.2);
+	};
+}
+
+
+// House 6
+object house:..20 {
+	parent trip_meter6;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint3+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand1*random.normal(1,.2);
+	};
+}
+
+
+
+// House 7
+object house:..20 {
+	parent trip_meter7;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint5+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand2*random.normal(1,.2);
+	};
+}
+
+
+
+// House 8
+object house:..20 {
+	parent trip_meter8;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand2*random.normal(1,.2);
+	};
+}
+
+
+
+// House 9
+object house:..20 {
+	parent trip_meter9;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint5+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand3*random.normal(1,.2);
+	};
+}
+
+
+
+// House 10
+object house:..20 {
+	parent trip_meter10;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint4+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand3*random.normal(1,.2);
+	};
+}
+
+
+
+// House 11
+object house:..20 {
+	parent trip_meter11;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand2*random.normal(1,.2);
+	};
+}
+
+// House 12
+object house:..20 {
+	parent trip_meter12;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint1+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand3*random.normal(1,.2);
+	};
+}
+
+
+
+// House 13
+object house:..20 {
+	parent trip_meter13;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint3+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand2*random.normal(1,.2);
+	};
+}
+
+
+// House 14
+object house:..20 {
+	parent trip_meter14;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint4+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand1*random.normal(1,.2);
+	};
+}
+
+
+// House 15
+object house:..20 {
+	parent trip_meter15;
+	flags DELTAMODE;
+	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
+	object ZIPload {
+		base_power ZIP1base_power*random.normal(1,.25);
+		power_fraction 0.2;
+		impedance_fraction 0.3;
+		current_fraction 0.5;
+		power_pf 0.9;
+		current_pf 0.6;
+		impedance_pf 0.8;
+	};
+	object waterheater {
+		location INSIDE;
+		water_demand waterdemand3*random.normal(1,.2);
+	};
+}
+
+
+// Inverters
+
+object inverter {
+	name solar_inv_1;
+	phases CS;
+	parent trip_meter1;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_1;
+	        phases CS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_2;
+	phases AS;
+	parent trip_meter2;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_2;
+	        phases AS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_3;
+	phases BS;
+	parent trip_meter3;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_3;
+	        phases BS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_4;
+	phases CS;
+	parent trip_meter4;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_4;
+	        phases CS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_5;
+	phases BS;
+	parent trip_meter5;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_5;
+	        phases BS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_6;
+	phases CS;
+	parent trip_meter6;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_6;
+	        phases CS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_7;
+	phases BS;
+	parent trip_meter7;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_7;
+	        phases BS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_8;
+	phases CS;
+	parent trip_meter8;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_8;
+	        phases CS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_9;
+	phases AS;
+	parent trip_meter9;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_9;
+	        phases AS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_10;
+	phases AS;
+	parent trip_meter10;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_10;
+	        phases AS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_11;
+	phases BS;
+	parent trip_meter11;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_11;
+	        phases BS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_12;
+	phases CS;
+	parent trip_meter12;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_12;
+	        phases CS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_13;
+	phases AS;
+	parent trip_meter13;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_13;
+	        phases AS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_14;
+	phases BS;
+	parent trip_meter14;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_14;
+	        phases BS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+object inverter {
+	name solar_inv_15;
+	phases CS;
+	parent trip_meter15;
+	inverter_efficiency .95;
+	rated_power 6000;	
+        generator_mode CONSTANT_PF;
+        generator_status ONLINE;
+        inverter_type PWM; 
+        flags DELTAMODE;
+        dynamic_model_mode PID;
+        inverter_convergence_criterion 0.001;
+        power_factor 1.0;
+        object solar {
+	        name solar_15;
+	        phases CS;
+	        generator_status ONLINE;
+	        generator_mode SUPPLY_DRIVEN;
+	        panel_type SINGLE_CRYSTAL_SILICON;
+	        area 250 ft^2;
+	        tilt_angle 47.0;
+	        efficiency 0.135;
+
+	};
+}
+
+
+object collector {
+        group "class=solar";
+        flags DELTAMODE;
+        property sum(VA_Out.real), sum(VA_Out.imag);
+        file production_pv_outputs/solar_prod.csv;
+	interval 1;	
+	limit 100000000000;
+   };   
+
+
+// Collectors and recorders
+
+object multi_recorder {
+	flags DELTAMODE;
+	property trip_meter1:measured_real_power,trip_meter2:measured_real_power,trip_meter3:measured_real_power,trip_meter4:measured_real_power,trip_meter5:measured_real_power,trip_meter6:measured_real_power,trip_meter7:measured_real_power,trip_meter8:measured_real_power,trip_meter9:measured_real_power,trip_meter10:measured_real_power,trip_meter11:measured_real_power,trip_meter12:measured_real_power,trip_meter13:measured_real_power,trip_meter14:measured_real_power,trip_meter15:measured_real_power;
+	file "IEEE_13_Node_With_Houses.csv";
+	interval 1;
+	limit 100000000000;
+}
+
+    
+//object collector {
+//        group "class=ZIPload";
+//        flags DELTAMODE;
+//        property sum(base_power);
+//        file consumption_outputs/consumption.csv;
+//}
+
+object collector {
+        group "class=triplex_meter";
+        flags DELTAMODE;
+        property sum(measured_real_power), sum(measured_reactive_power);
+        file consumption_outputs/consumption.csv;
+}
+
+//object collector {
+//        group "class=meter";
+//        flags DELTAMODE;
+//        property sum(measured_power_A.real), sum(measured_power_A.imag), sum(measured_power_B.real), sum(measured_power_B.imag), sum(measured_power_C.real), sum(measured_power_C.imag);
+//        interval 1;
+//        limit 100000000000;
+//        file consumption_outputs/consumption.csv;
+//}
+
+
+
+
+
